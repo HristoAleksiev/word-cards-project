@@ -9,18 +9,19 @@ window.title("Language Flash Cards")
 window.config(pady=50, padx=50, bg=BACKGROUND_COLOR)
 
 
+# Changes visual appearance of the card and displays the correct translation of the word:
 def flip_card():
     canvas.itemconfig(card_side, image=canvas_image_back)
     canvas.itemconfig(language, text="English", fill="white")
     canvas.itemconfig(current_word, text=next_word["English"], fill="white")
 
 
+# Gets the next random word from the list and sets timer before the card is flipped:
 def get_next_word():
     global next_word, timer
     window.after_cancel(timer)
 
     next_word = words_dict[r.randint(0, len(words_dict) - 1)]
-    print(next_word)
 
     canvas.itemconfig(card_side, image=canvas_image_front)
     canvas.itemconfig(language, text="French", fill="black")
@@ -30,16 +31,19 @@ def get_next_word():
     timer = window.after(3000, flip_card)
 
 
+# Custom method called only when the word is flagged as know, word is removed from list and progress is saved into
+# a separate file:
 def word_is_known():
     words_dict.remove(next_word)
     unknown_known_words = pandas.DataFrame(words_dict)
     unknown_known_words.to_csv("data/words_to_learn.csv", index=False)
-    print(len(words_dict))
 
     get_next_word()
 
 
 # Reads from the csv file and loads all the words into a list of dictionaries:
+# Try/Catch block will load words as per previous progress or from the full list of words if the progress file does
+# not exist in the data folder.
 try:
     words_cvs_file_data = pandas.read_csv("data/words_to_learn.csv")
 except FileNotFoundError:
@@ -73,6 +77,7 @@ button_wrong.grid(column=0, row=1)
 button_right = Button(image=button_img_right, highlightthickness=0, bd=0, command=word_is_known)
 button_right.grid(column=1, row=1)
 
+# Getting our first word by calling the method manually
 get_next_word()
 
 mainloop()
